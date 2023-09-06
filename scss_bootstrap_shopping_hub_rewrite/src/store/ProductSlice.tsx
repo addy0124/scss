@@ -111,7 +111,6 @@ const initialCategorieswithproducts =
 }
 
 
-
 //URL : https://dummyjson.com/products?limit=3
 export const getAsyncProducts = async(limit: number) : Promise<Allproducts|any> => {
     try{
@@ -139,7 +138,45 @@ export const getAllcategories = async() : Promise<string[] | any> =>{
 
 } 
 
-console.log("`${BASE_URL}products/categories`: ", `${BASE_URL}products/categories`);
+//URL: https://dummyjson.com/products/id
+export const fetchAsyncProductSingle = async(id:string) : Promise<Product | any> =>{
+  try{
+      const response = 
+      await axios.get<Product>(`${BASE_URL}products/${id}`)
+      const product: Product = response.data;
+      return product;
+  } 
+  catch(error:any){
+      console.error('Error:', error);
+  }
+}
+
+//URL: https://dummyjson.com/products/category/category
+export const fetchAsyncProductsOfCategory = async(category:string) : Promise<Allproducts | any> =>{
+  try{
+      const response = 
+      await axios.get<Allproducts>(`${BASE_URL}products/category/${category}`)
+      const categorylist: Allproducts = response.data;
+      return categorylist;
+  } 
+  catch(error:any){
+      console.error('Error:', error);
+  }
+}
+
+export const fetchAsyncSearchProduct = async(searchTerm:string) : Promise<Allproducts | any> =>{
+  try{
+      const response = 
+      await axios.get<Allproducts>(`${BASE_URL}products/search?q=${searchTerm}`)
+      const searchlist: Allproducts = response.data;
+      return searchlist;
+  } 
+  catch(error:any){
+      console.error('Error:', error);
+  }
+}
+
+
 
 
 const ProductSlice = () => {

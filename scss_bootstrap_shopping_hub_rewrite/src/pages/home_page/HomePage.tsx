@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useCallback,useMemo } from 'react'
+import React, { useState,useEffect,useCallback,useMemo,useContext } from 'react'
 import HeaderSlider from '../../components/slider/HeaderSlider'
 import "./HomePage.scss";
 import { BASE_URL } from '../../utils/apiURL';
@@ -6,48 +6,31 @@ import { Allproducts, Product, getAllcategories, getAsyncProducts } from '../../
 import { type } from 'os';
 import { title } from 'process';
 import ProductList from '../../components/productlist/ProductList';
+import Loader from '../../components/loader/Loader';
+import { ProductlistContext } from '../../context/Productlist_Provider';
 
 const HomePage: React.FC = () => {
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>();
+  const { productlist,categories } = useContext(ProductlistContext);
+
+  const slicecategories =  categories?.slice(0,4)
   //const [tempProducts, setTempProducts] = useState<Product[]>([]);
 
-  const fetchProductData = async()=>{
-    const allProducts: Allproducts = await getAsyncProducts(20);
-    if(allProducts){
-      setProducts(allProducts.products);
-    }
-  }
-
-  const fetchCategoriesData = async()=>{
-    const categories: string[] = await getAllcategories();
-    if(categories){
-      setCategories(categories);
-    }
-  }
-
-  useEffect(() => {
-    fetchProductData();
-    fetchCategoriesData();
-  }, []);
-
-  console.log("products : ", products);
 
   const tempProducts:Product[]  = useMemo(()=>{
     const tempProducts : Product[] = [];
-    if(products.length > 0){
-      for(let i in products){
-        let randomIndex = Math.floor(Math.random()*products.length);
+    if(productlist.length > 0){
+      for(let i in productlist){
+        let randomIndex = Math.floor(Math.random()*productlist.length);
         //to avoid same item
-        while(tempProducts.includes(products[randomIndex])){
-          randomIndex = Math.floor(Math.random()*products.length);
+        while(tempProducts.includes(productlist[randomIndex])){
+          randomIndex = Math.floor(Math.random()*productlist.length);
         }
-        tempProducts[i] = products[randomIndex];
+        tempProducts[i] = productlist[randomIndex];
       }
     }
     return tempProducts
-  },[products])
+  },[productlist])
 
   /* 
   create the Categorieswithproducts
@@ -59,7 +42,7 @@ const HomePage: React.FC = () => {
   interface Categorieswithproducts {
     [key: string]: {
         name: string;
-        products: any[]; // Update the type as per your requirements
+        products: Product[]; // Update the type as per your requirements
     };
   }
 
@@ -73,15 +56,11 @@ const HomePage: React.FC = () => {
   })
 
   const categorieswithproductslist : Categorieswithproducts = initialCategorieswithproducts;
-
   categories?.forEach((category, index)=>{
-    const res: Product[] = products.filter(product => product.category === category);
+    const res: Product[] = productlist.filter(product => product.category === category);
     if (categorieswithproductslist.hasOwnProperty(category)) {
-      categorieswithproductslist[category as keyof Categorieswithproducts].products.push(res);}
+      categorieswithproductslist[category as keyof Categorieswithproducts].products.push(...res);}
   })
-
-  console.log("categorieswithproductslist : ", categorieswithproductslist);
-
 
   return (
     <main>
@@ -95,8 +74,18 @@ const HomePage: React.FC = () => {
               <div className='title-md'>
                 <h3>See our products</h3>
               </div>
-              { tempProducts?.length < 0 ? <div>loading</div> : <ProductList products = {tempProducts} />}
+              { tempProducts?.length < 0 ? <Loader /> : <ProductList products = {tempProducts} />}
             </div>
+
+
+            {slicecategories?.map((category, index)=>(
+              <div className='categories-item' key={index}>
+                   <div className='title-md'>
+                   <h3>{category}</h3>
+              </div>
+              { !categorieswithproductslist ? <Loader /> : <ProductList products = {categorieswithproductslist[category].products} />}
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,22 +1,34 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 
 import "./Navbar.scss";
 import { Link } from 'react-router-dom';
 import Sidebar from '../sidebar/Sidebar';
 import CartModal from '../cartmodal/CartModal';
+import { ProductlistContext } from '../../context/Productlist_Provider';
+import { CartContext } from '../../context/CartContext_Provider';
 
 
 const Navbar = () => {
 
+  const { categories } = useContext(ProductlistContext);
+  const { cartItems } = useContext(CartContext);
+
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const categories = ["Smartphones", "Laptops", "Laptops", "Laptops", "Laptops", "Smartphones", "Laptops", "Laptops"
-  , "Laptops", "Laptops", "Smartphones", "Laptops", "Laptops", "Laptops", "Laptops", "Laptops", "Laptops", "Laptops", "Laptops"]
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
   const toggleSidebar = (isShow:boolean) =>{
     setShowSidebar(isShow)
   }
 
+  const handleSearchTerm = (e:React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setSearchTerm(e.target.value);
+  }
+
+  const cartQuantity = cartItems.reduce(
+    (quantity, item) => item.quantity + quantity,
+    0
+  )
 
   return (
     <div className='row navbar'>
@@ -45,7 +57,7 @@ const Navbar = () => {
           {/* search */}
           <div className='navbar-search bg-white mx-md-0' >
             <div className='flex align-center'>
-              <input type = "text" className='form-control-input fs-14' placeholder='Search your preferred items here' />
+              <input type = "text" className='form-control-input fs-14' placeholder='Search your preferred items here' onChange={(e) => handleSearchTerm(e)}/>
               <Link to = {`search/${searchTerm}`} className='text-white search-btn flex align-center justify-center'>
                 <i className='fa-solid fa-magnifying-glass'></i>
               </Link>
@@ -76,7 +88,7 @@ const Navbar = () => {
         <div className='navbar-cart flex align-center justify-content-end'>
           <Link to = "/cart" className='cart-btn'>
               <i className='fa-solid fa-cart-shopping'></i>
-              <div className='cart-items-value'>10</div>
+              <div className='cart-items-value'>{cartQuantity}</div>
           </Link>
         </div>
       </div>
